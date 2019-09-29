@@ -1,0 +1,134 @@
+{
+    "tasks": [
+       {
+           "taskId":"94a74903-f93f-4075-884f-dc11f34058b4",
+           "version":"2.*",
+           "name":"Azure Create Or Update Resource Group",
+           "inputs":{
+               "ConnectedServiceName":"PS_CLOUD_PROVIDER_ENDPOINT_ID",
+               "action":"Create Or Update Resource Group",
+               "resourceGroupName":"$(AZ_RESOURCE_GROUP_NAME)",
+               "location":"$(AZ_RESOURCE_GROUP_LOCATION)",
+               "templateLocation":"Linked artifact",
+               "csmFileLink":"",
+               "csmParametersFileLink":"",
+               "csmFile":"$(System.DefaultWorkingDirectory)/$(BUILD_DEFINITION)/Scripts/infra.definition.json",
+               "csmParametersFile":"$(System.DefaultWorkingDirectory)/$(BUILD_DEFINITION)/Scripts/infra.definition.params.json",
+               "overrideParameters": "-location \"$(AZ_RESOURCE_GROUP_LOCATION)\" -environment \"$(ASPNETCORE_ENVIRONMENT)\" -feature \"$(ASPNETCORE_FEATURE)\"",
+               "deploymentMode":"Incremental",
+               "enableDeploymentPrerequisites":"None",
+               "deploymentGroupEndpoint":"",
+               "project":"",
+               "deploymentGroupName":"",
+               "copyAzureVMTags":"true",
+               "runAgentServiceAsUser":"false",
+               "userName":"",
+               "password":"",
+               "outputVariable":"",
+               "deploymentOutputs":""
+           }
+       },
+       {
+            "taskId": "584bcff2-3353-4f11-872b-6ba01267a972",
+            "version": "5.*",
+            "name": "Get ARM Outputs",
+            "inputs": {
+                "ConnectedServiceNameSelector": "ConnectedServiceNameARM",
+                "ConnectedServiceNameARM": "PS_CLOUD_PROVIDER_ENDPOINT_ID",
+                "resourceGroupName": "$(AZ_RESOURCE_GROUP_NAME)",
+                "prefix": "",
+                "outputNames": "",
+                "whenLastDeploymentIsFailed": "fail",
+                "deploymentNameFilter": ""
+            }
+       },
+       {
+            "taskId": "46e4be58-730b-4389-8a2f-ea10b3e5e815",
+            "version": "1.*",
+            "name": "Enabled Static Web Site",
+            "inputs": {
+                "connectedServiceNameARM": "PS_CLOUD_PROVIDER_ENDPOINT_ID",
+                "scriptLocation": "inlineScript",
+                "scriptPath": "",
+                "inlineScript": "az storage blob service-properties update --404-document index.html --account-name $(storageAccountName) --index-document index.html --static-website true",
+                "args": "",
+                "addSpnToEnvironment": "false",
+                "useGlobalConfig": "false",
+                "cwd": "",
+                "failOnStandardError": "false"
+            }
+       },
+       {
+           "taskId": "eb72cb01-a7e5-427b-a8a1-1b31ccac8a43",
+           "version":"2.*",
+           "name":"Azure App Deploy",
+           "inputs":{
+                "SourcePath": "$(System.DefaultWorkingDirectory)/$(BUILD_DEFINITION)/Executable/$(AZ_WEB_APP_NAME)",
+                "ConnectedServiceNameSelector": "ConnectedServiceNameARM",
+                "ConnectedServiceName": "",
+                "ConnectedServiceNameARM": "PS_CLOUD_PROVIDER_ENDPOINT_ID",
+                "Destination": "AzureBlob",
+                "StorageAccount": "",
+                "StorageAccountRM": "$(storageAccountName)",
+                "ContainerName": "$web",
+                "BlobPrefix": "",
+                "EnvironmentName": "",
+                "EnvironmentNameRM": "",
+                "ResourceFilteringMethod": "machineNames",
+                "MachineNames": "",
+                "vmsAdminUserName": "",
+                "vmsAdminPassword": "",
+                "TargetPath": "",
+                "AdditionalArgumentsForBlobCopy": "",
+                "AdditionalArgumentsForVMCopy": "",
+                "enableCopyPrerequisites": "false",
+                "CopyFilesInParallel": "true",
+                "CleanTargetBeforeCopy": "false",
+                "skipCACheck": "true",
+                "outputStorageUri": "",
+                "outputStorageContainerSasToken": ""
+           }
+       }
+     ],
+    "variables": 
+    {
+       "BUILD_DEFINITION":{
+           "isSecret":false,
+           "value":"PS_COMMIT_STAGE_NAME",
+           "scope":{
+               "key":2147483647,
+               "value":"Release",
+               "isDefault":true
+           }
+       },
+       "AZ_WEB_APP_NAME":{
+           "isSecret":false,
+           "value":"PS_SERVICE_NAME",
+           "scope":{
+               "key":2147483647,
+               "value":"Release",
+               "isDefault":true
+           }
+       },
+       "AZ_RESOURCE_GROUP_NAME":{
+           "allowOverride":false,
+           "isSecret":false,
+           "value":"PS_ORGANIZATION_NAMEPS_PROJECT_NAMEPS_SERVICE_NAME$(ASPNETCORE_ENVIRONMENT)$(ASPNETCORE_FEATURE)",
+           "scope":{
+               "key":2147483647,
+               "value":"Release",
+               "isDefault":true
+           }
+       },
+       "AZ_RESOURCE_GROUP_LOCATION":{
+           "allowOverride":false,
+           "isSecret":false,
+           "value":"PS_ACCESS_REGION",
+           "scope":{
+               "key":2147483647,
+               "value":"Release",
+               "isDefault":true
+           }
+       }
+    }
+   }
